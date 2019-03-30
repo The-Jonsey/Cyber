@@ -1,0 +1,16 @@
+.table {
+    overflow: auto;
+    height: unset;
+}
+
+.cont {
+    width: 100%;
+    height: 80%;
+    overflow: auto;
+}
+
+thead {
+    position: sticky;
+    top: 0;
+    background: #fff;
+}

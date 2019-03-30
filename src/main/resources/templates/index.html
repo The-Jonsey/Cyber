@@ -1,0 +1,34 @@
+<html xmlns:th="http://www.w3.org/1999/xhtml">
+    <head>
+    </head>
+    <body>
+    <th:block th:insert="~{header::copy}"></th:block>
+    <form action="/" method="POST" enctype="multipart/form-data">
+        <input class="form-control-file" name="file" type="file" accept="text/csv" required>
+        <input class="form-control" name="seperator" type="text" maxlength="1" placeholder="seperator" required>
+        <input class="btn btn-primary" type="submit">
+    </form>
+    <h3 th:if="${error}" th:text="${error}"></h3>
+    <div class="cont" th:if="${list}">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Count</th>
+                <th>Row</th>
+                <th>Hash</th>
+            </tr>
+            </thead>
+            <tbody>
+            <th:block th:each="map : ${list}">
+                <tr>
+                    <th:block th:each="entry : ${map}">
+                        <td th:text="${entry.value}"></td>
+                    </th:block>
+                </tr>
+            </th:block>
+            </tbody>
+        </table>
+    </div>
+    <th:block th:insert="~{footer::copy}"></th:block>
+    </body>
+</html>
