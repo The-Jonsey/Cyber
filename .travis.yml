@@ -1,6 +1,10 @@
 language: java
 jdk:
   - openjdk11
+services:
+  mysql
+before_install:
+  - mysql -e 'CREATE DATABASE Cyber; GRANT ALL PRIVILEGES ON Cyber.* TO "spring"@"localhost" IDENTIFIED BY "cyber"; FLUSH PRIVILEGES;'
 script:
   - mvn install
   - mvn package
