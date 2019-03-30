@@ -1,0 +1,11 @@
+language: java
+jdk:
+  - openjdk11
+script:
+  - mvn install
+  - mvn package
+deploy:
+  provider: script
+  script: sh deploy.sh $word
+  on:
+    branch: master
