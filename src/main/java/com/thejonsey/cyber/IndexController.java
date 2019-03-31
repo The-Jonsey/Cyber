@@ -1,15 +1,14 @@
 package com.thejonsey.cyber;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletContext;
@@ -117,5 +116,11 @@ public class IndexController {
         map.put("count", log.getCount());
         map.put("row", log.getRow());
         return map;
+    }
+
+    @RequestMapping(path="/500")
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public void InternalServerError() throws ResponseStatusException{
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Test");
     }
 }
