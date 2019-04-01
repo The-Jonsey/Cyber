@@ -42,20 +42,19 @@ public class IndexController {
             page = 1;
         }
         ArrayList<Log> logs = (ArrayList<Log>) logRepository.findAll();
-        if (logs.size() > (page * 50)) {
-            model.addAttribute("next", true);
-        }
-        if (page > 1) {
-            model.addAttribute("back", true);
-        }
-        List<Log> logsList = logs.subList(((page - 1) * 50), (page * 50));
-        List<HashMap<String, Object>> rows = new ArrayList<>();
-        for (Log log : logsList) {
-            rows.add(LogToHashMap(log));
-        }
-        System.out.println(rows);
-        if (rows.size() > 0) {
-            model.addAttribute("list", rows);
+        if (logs.size() > 0) {
+            if (logs.size() > (page * 50)) {
+                model.addAttribute("next", true);
+            }
+            if (page > 1) {
+                model.addAttribute("back", true);
+            }
+            List<Log> logsList = logs.subList(((page - 1) * 50), (page * 50));
+            List<HashMap<String, Object>> rows = new ArrayList<>();
+            for (Log log : logsList) {
+                rows.add(LogToHashMap(log));
+            }
+                model.addAttribute("list", rows);
         }
         return new ModelAndView("index");
     }
