@@ -1,5 +1,6 @@
 package com.thejonsey.cyber;
 
+import org.apache.commons.csv.CSVParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -36,13 +37,26 @@ public class IndexController {
     ServletContext context;
 
     @GetMapping(path="/")
-    public ModelAndView getIndex(ModelMap model) {
+    public ModelAndView getIndex(ModelMap model, @RequestParam(required = false) Integer page) {
+        if (page == null) {
+            page = 1;
+        }
         ArrayList<Log> logs = (ArrayList<Log>) logRepository.findAll();
+        if (logs.size() > (page * 50)) {
+            model.addAttribute("next", true);
+        }
+        if (page > 1) {
+            model.addAttribute("back", true);
+        }
+        List<Log> logsList = logs.subList(((page - 1) * 50), (page * 50));
         List<HashMap<String, Object>> rows = new ArrayList<>();
-        logs.forEach(log -> rows.add(LogToHashMap(log)));
+        for (Log log : logsList) {
+            rows.add(LogToHashMap(log));
+        }
         System.out.println(rows);
-        if (rows.size() > 0)
-        model.addAttribute("list", rows);
+        if (rows.size() > 0) {
+            model.addAttribute("list", rows);
+        }
         return new ModelAndView("index");
     }
 
@@ -54,53 +68,69 @@ public class IndexController {
         } else {
             MultipartFile multipartFile = file.getFile();
             String content = new String(multipartFile.getBytes(), StandardCharsets.UTF_8);
-            ArrayList<HashMap<String, Object>> rowsMap = new ArrayList<>();
+            //CSVParser parser = CSVParser.parse(content, ",");
+            HashMap<String, Integer> rowsMap = new HashMap<>();
+            System.out.println(content.split("\\n").length);
+            final int[] i = {0};
             for (String row : content.split("\\n")) {
+                if (rowsMap.containsKey(row)) {
+                    rowsMap.put(row, rowsMap.get(row) + 1);
+                }
+                else {
+                    rowsMap.put(row, 1);
+                }
+                System.out.println(++i[0]);
+            }
+            ArrayList<HashMap<String, Object>> rowsMapList = new ArrayList<>();
+            System.out.println(rowsMap.size());
+            i[0] = 0;
+            rowsMap.forEach((k, v) -> {
                 try {
-                    byte[] bytesOfMessage = row.getBytes(StandardCharsets.UTF_8);
+                    byte[] bytesOfMessage = k.getBytes(StandardCharsets.UTF_8);
                     MessageDigest md = MessageDigest.getInstance("MD5");
                     byte[] digest = md.digest(bytesOfMessage);
                     BigInteger bigInt = new BigInteger(1, digest);
                     String hashtext = bigInt.toString(16);
-
-                    final Boolean[] replaced = {false};
-                    rowsMap.forEach((HashMap<String, Object> item) -> {
-                        if (item.get("hash").toString().equals(hashtext)) {
-                            item.replace("count", (Integer) item.get("count") + 1);
-                            replaced[0] = true;
-                        }
-                    });
-                    if (!replaced[0]) {
-                        HashMap<String, Object> item = new HashMap<>();
-                        item.put("hash", hashtext);
-                        item.put("row", row);
-                        item.put("count", 1);
-                        rowsMap.add(item);
-                    }
+                    HashMap<String, Object> item = new HashMap<>();
+                    item.put("hash", hashtext);
+                    item.put("row", k);
+                    item.put("count", v);
+                    rowsMapList.add(item);
+                    System.out.println(++i[0]);
                 } catch (NoSuchAlgorithmException e) {
                     e.printStackTrace();
                 }
-            }
-            rowsMap.sort(new HashMapComparator());
-            System.out.println(HashPropertyArray(rowsMap, "count"));
-            ArrayList<Log> logs = (ArrayList<Log>) logRepository.findAll();
-            rowsMap.forEach(row -> {
-                Boolean[] set = {false};
-                logs.forEach(log -> {
-                    if (log.getHash().equals(row.get("hash").toString())) {
-                        log.setCount(log.getCount() + (Integer) row.get("count"));
-                        set[0] = true;
-                    }
-                });
-                if (!set[0]) {
-                    logs.add(new Log(row.get("hash").toString(), row.get("row").toString(), (Integer) row.get("count")));
-                }
             });
+            rowsMapList.sort(new HashMapComparator());
+            ArrayList<Log> logs = (ArrayList<Log>) logRepository.findAll();
+            System.out.println(rowsMapList.size());
+            i[0] = 0;
+            if (logs.size() > 0) {
+                ArrayList<String> hashes = new ArrayList<>();
+                logs.forEach(log -> hashes.add(log.getHash()));
+                rowsMapList.forEach(row -> {
+                    if (hashes.contains(row.get("hash").toString())) {
+                        int index = hashes.indexOf(row.get("hash").toString());
+                        Log log = logs.get(index);
+                        log.setCount(log.getCount() + (Integer) row.get("count"));
+                    }
+                    else {
+                        logs.add(new Log(row.get("hash").toString(), row.get("row").toString(), (Integer) row.get("count")));
+                    }
+                    System.out.println(++i[0]);
+                });
+            }
+            else {
+                rowsMapList.forEach(row -> {
+                    logs.add(new Log(row.get("hash").toString(), row.get("row").toString(), (Integer) row.get("count")));
+                    System.out.println(++i[0]);
+                });
+            }
+            System.out.println(logs.size());
             logRepository.saveAll(logs);
-            return getIndex(model);
+            return getIndex(model, null);
         }
     }
-
     private ArrayList<Object> HashPropertyArray(ArrayList<HashMap<String, Object>> list, String property) {
         ArrayList<Object> properties = new ArrayList<>();
         list.forEach((HashMap<String, Object> item) -> {

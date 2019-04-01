@@ -6,7 +6,7 @@ import javax.persistence.*;
 @Embeddable
 public class Log {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String hash;
     private String row;

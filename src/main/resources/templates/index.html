@@ -10,6 +10,10 @@
         <input class="btn btn-primary" type="submit">
     </form>
     <h3 th:if="${error}" th:text="${error}"></h3>
+    <div>
+        <button th:if="${back}" class="btn btn-primary" style="display: inline-block" onclick="previousPage()">Previous</button>
+        <button th:if="${next}" class="btn btn-primary" style="display: inline-block" onclick="nextPage()">Next</button>
+    </div>
     <div class="cont" th:if="${list}">
         <table class="table table-striped">
             <thead>
@@ -31,5 +35,32 @@
         </table>
     </div>
     <th:block th:insert="~{footer::copy}"></th:block>
+    <script>
+        function getPage() {
+            let qs = window.location.search.substr(1).split("&");
+            if (qs.length > 0) {
+                for (let q in qs) {
+                    q = qs[q];
+                    q = q.split("=");
+                    if (q[0] === "page") {
+                        return parseInt(q[1]);
+                    }
+                }
+                return 1;
+            }
+            else
+                return 1;
+
+        }
+
+        function nextPage() {
+            let page = getPage();
+            window.location = "/?page=" + (page + 1);
+        }
+        function previousPage() {
+            let page = getPage();
+            window.location = "/?page=" + (page - 1);
+        }
+    </script>
     </body>
 </html>
