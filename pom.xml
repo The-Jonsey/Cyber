@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.thejonsey.cyber</groupId>
 	<artifactId>Cyber</artifactId>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Cyber Security MVC</name>
 	<url>https://thejonsey.com</url>

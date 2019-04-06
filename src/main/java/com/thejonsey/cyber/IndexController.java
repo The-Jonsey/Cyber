@@ -1,5 +1,6 @@
 package com.thejonsey.cyber;
 
+import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -67,7 +68,7 @@ public class IndexController {
         } else {
             MultipartFile multipartFile = file.getFile();
             String content = new String(multipartFile.getBytes(), StandardCharsets.UTF_8);
-            //CSVParser parser = CSVParser.parse(content, ",");
+            CSVParser parser = CSVParser.parse(content, CSVFormat.DEFAULT);
             HashMap<String, Integer> rowsMap = new HashMap<>();
             System.out.println(content.split("\\n").length);
             final int[] i = {0};
