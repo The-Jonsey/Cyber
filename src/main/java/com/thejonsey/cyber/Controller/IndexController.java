@@ -1,6 +1,12 @@
-package com.thejonsey.cyber;
+package com.thejonsey.cyber.Controller;
 
-import org.apache.commons.csv.CSVParser;
+import com.thejonsey.cyber.Classes.AsyncSave;
+import com.thejonsey.cyber.Classes.FileModel;
+import com.thejonsey.cyber.Classes.HashMapComparator;
+import com.thejonsey.cyber.Model.File;
+import com.thejonsey.cyber.Model.FileRepository;
+import com.thejonsey.cyber.Model.Log;
+import com.thejonsey.cyber.Model.LogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -18,6 +24,7 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,10 +34,12 @@ import java.util.List;
 public class IndexController {
 
     private final LogRepository logRepository;
+    private final FileRepository fileRepository;
 
     @Autowired
-    public IndexController(LogRepository logRepository) {
+    public IndexController(LogRepository logRepository, FileRepository fileRepository) {
         this.logRepository = logRepository;
+        this.fileRepository = fileRepository;
     }
 
     @Autowired
@@ -38,10 +47,13 @@ public class IndexController {
 
     @GetMapping(path="/")
     public ModelAndView getIndex(ModelMap model, @RequestParam(required = false) Integer page) {
+        return getIndex(model, page, (ArrayList<Log>) logRepository.findAll());
+    }
+
+    public ModelAndView getIndex(ModelMap model, Integer page, ArrayList<Log> logs) {
         if (page == null) {
             page = 1;
         }
-        ArrayList<Log> logs = (ArrayList<Log>) logRepository.findAll();
         if (logs.size() > 0) {
             if (logs.size() > (page * 50)) {
                 model.addAttribute("next", true);
@@ -66,6 +78,7 @@ public class IndexController {
             return new ModelAndView("index");
         } else {
             MultipartFile multipartFile = file.getFile();
+            File fileClass = new File(multipartFile.getOriginalFilename(), new Date(System.currentTimeMillis()));
             String content = new String(multipartFile.getBytes(), StandardCharsets.UTF_8);
             //CSVParser parser = CSVParser.parse(content, ",");
             HashMap<String, Integer> rowsMap = new HashMap<>();
@@ -114,20 +127,20 @@ public class IndexController {
                         log.setCount(log.getCount() + (Integer) row.get("count"));
                     }
                     else {
-                        logs.add(new Log(row.get("hash").toString(), row.get("row").toString(), (Integer) row.get("count")));
+                        logs.add(new Log(row.get("hash").toString(), row.get("row").toString(), (Integer) row.get("count"), fileClass));
                     }
                     System.out.println(++i[0]);
                 });
             }
             else {
                 rowsMapList.forEach(row -> {
-                    logs.add(new Log(row.get("hash").toString(), row.get("row").toString(), (Integer) row.get("count")));
+                    logs.add(new Log(row.get("hash").toString(), row.get("row").toString(), (Integer) row.get("count"), fileClass));
                     System.out.println(++i[0]);
                 });
             }
             System.out.println(logs.size());
-            logRepository.saveAll(logs);
-            return getIndex(model, null);
+            new AsyncSave(logs, fileClass, logRepository, fileRepository).start();
+            return getIndex(model, null, logs);
         }
     }
     private ArrayList<Object> HashPropertyArray(ArrayList<HashMap<String, Object>> list, String property) {

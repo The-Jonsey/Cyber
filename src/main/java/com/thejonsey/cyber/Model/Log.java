@@ -1,9 +1,10 @@
-package com.thejonsey.cyber;
+package com.thejonsey.cyber.Model;
 
 import javax.persistence.*;
 
 @Entity
 @Embeddable
+@Table(name="Log")
 public class Log {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -11,6 +12,12 @@ public class Log {
     private String hash;
     private String row;
     private Integer count;
+
+    //@OneToMany(mappedBy = "File", cascade = CascadeType.ALL)
+    //@JoinColumn(table = "File", name = "id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "fileid")
+    private File fileid;
 
     public Integer getId() {
         return id;
@@ -44,9 +51,18 @@ public class Log {
 
     }
 
-    public Log(String hash, String row, Integer count) {
+    public Log(String hash, String row, Integer count, File fileid) {
         this.hash = hash;
         this.row = row;
         this.count = count;
+        this.fileid = fileid;
+    }
+
+    public File getFileid() {
+        return fileid;
+    }
+
+    public void setFileid(File fileid) {
+        this.fileid = fileid;
     }
 }

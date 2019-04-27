@@ -1,5 +1,6 @@
-package com.thejonsey.cyber;
+package com.thejonsey.cyber.Classes;
 
+import com.thejonsey.cyber.Application;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 

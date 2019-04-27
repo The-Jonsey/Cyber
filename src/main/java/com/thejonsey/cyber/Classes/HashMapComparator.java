@@ -1,4 +1,4 @@
-package com.thejonsey.cyber;
+package com.thejonsey.cyber.Classes;
 
 import java.util.Comparator;
 import java.util.HashMap;

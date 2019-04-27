@@ -1,4 +1,4 @@
-package com.thejonsey.cyber;
+package com.thejonsey.cyber.Model;
 
 import java.util.ArrayList;
 

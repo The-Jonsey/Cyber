@@ -1,4 +1,4 @@
-package com.thejonsey.cyber;
+package com.thejonsey.cyber.Classes;
 
 import org.springframework.web.multipart.MultipartFile;
 
