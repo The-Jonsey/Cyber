@@ -1,6 +1,4 @@
 language: java
-jdk:
-  - openjdk10
 services:
   mysql
 before_install:
