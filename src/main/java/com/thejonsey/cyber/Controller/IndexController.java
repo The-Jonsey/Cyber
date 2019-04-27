@@ -50,7 +50,7 @@ public class IndexController {
         return getIndex(model, page, (ArrayList<Log>) logRepository.findAll());
     }
 
-    public ModelAndView getIndex(ModelMap model, Integer page, ArrayList<Log> logs) {
+    private ModelAndView getIndex(ModelMap model, Integer page, ArrayList<Log> logs) {
         if (page == null) {
             page = 1;
         }
@@ -82,8 +82,6 @@ public class IndexController {
             String content = new String(multipartFile.getBytes(), StandardCharsets.UTF_8);
             //CSVParser parser = CSVParser.parse(content, ",");
             HashMap<String, Integer> rowsMap = new HashMap<>();
-            System.out.println(content.split("\\n").length);
-            final int[] i = {0};
             for (String row : content.split("\\n")) {
                 if (rowsMap.containsKey(row)) {
                     rowsMap.put(row, rowsMap.get(row) + 1);
@@ -91,11 +89,8 @@ public class IndexController {
                 else {
                     rowsMap.put(row, 1);
                 }
-                System.out.println(++i[0]);
             }
             ArrayList<HashMap<String, Object>> rowsMapList = new ArrayList<>();
-            System.out.println(rowsMap.size());
-            i[0] = 0;
             rowsMap.forEach((k, v) -> {
                 try {
                     byte[] bytesOfMessage = k.getBytes(StandardCharsets.UTF_8);
@@ -108,15 +103,12 @@ public class IndexController {
                     item.put("row", k);
                     item.put("count", v);
                     rowsMapList.add(item);
-                    System.out.println(++i[0]);
                 } catch (NoSuchAlgorithmException e) {
                     e.printStackTrace();
                 }
             });
             rowsMapList.sort(new HashMapComparator());
             ArrayList<Log> logs = (ArrayList<Log>) logRepository.findAll();
-            System.out.println(rowsMapList.size());
-            i[0] = 0;
             if (logs.size() > 0) {
                 ArrayList<String> hashes = new ArrayList<>();
                 logs.forEach(log -> hashes.add(log.getHash()));
@@ -129,25 +121,18 @@ public class IndexController {
                     else {
                         logs.add(new Log(row.get("hash").toString(), row.get("row").toString(), (Integer) row.get("count"), fileClass));
                     }
-                    System.out.println(++i[0]);
                 });
             }
             else {
-                rowsMapList.forEach(row -> {
-                    logs.add(new Log(row.get("hash").toString(), row.get("row").toString(), (Integer) row.get("count"), fileClass));
-                    System.out.println(++i[0]);
-                });
+                rowsMapList.forEach(row -> logs.add(new Log(row.get("hash").toString(), row.get("row").toString(), (Integer) row.get("count"), fileClass)));
             }
-            System.out.println(logs.size());
             new AsyncSave(logs, fileClass, logRepository, fileRepository).start();
             return getIndex(model, null, logs);
         }
     }
     private ArrayList<Object> HashPropertyArray(ArrayList<HashMap<String, Object>> list, String property) {
         ArrayList<Object> properties = new ArrayList<>();
-        list.forEach((HashMap<String, Object> item) -> {
-            properties.add(item.get(property));
-        });
+        list.forEach((HashMap<String, Object> item) -> properties.add(item.get(property)));
         return properties;
     }
 
