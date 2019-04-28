@@ -8,6 +8,7 @@ import com.thejonsey.cyber.Model.FileRepository;
 import com.thejonsey.cyber.Model.Log;
 import com.thejonsey.cyber.Model.LogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -28,6 +29,7 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 @Controller
 @RequestMapping(path="/")
@@ -35,7 +37,10 @@ public class IndexController {
 
     private final LogRepository logRepository;
     private final FileRepository fileRepository;
-
+    private ArrayList<Log> logs;
+    private ArrayList<File> files;
+    private HashMap<Integer, ArrayList<Log>> pagedLogs;
+    private HashMap<File, HashMap<Integer, ArrayList<Log>>> filedPagedLogs = new HashMap<>();
     @Autowired
     public IndexController(LogRepository logRepository, FileRepository fileRepository) {
         this.logRepository = logRepository;
@@ -46,27 +51,50 @@ public class IndexController {
     ServletContext context;
 
     @GetMapping(path="/")
-    public ModelAndView getIndex(ModelMap model, @RequestParam(required = false) Integer page) {
-        return getIndex(model, page, (ArrayList<Log>) logRepository.findAll());
-    }
-
-    private ModelAndView getIndex(ModelMap model, Integer page, ArrayList<Log> logs) {
+    private ModelAndView getIndex(ModelMap model, @RequestParam(required = false) Integer page, @RequestParam(required = false) Integer file) {
+        if (this.logs == null) {
+            this.logs = (ArrayList<Log>) logRepository.findAll();
+            this.files = (ArrayList<File>) fileRepository.findAll();
+            this.pagedLogs = new HashMap<>();
+        }
+        if (this.pagedLogs.isEmpty()) {
+            this.setPagedLogs();
+        }
         if (page == null) {
             page = 1;
         }
+        if (file == null) {
+            file = this.files.get(0).getId();
+        }
+        File fileObject = null;
+        for (File f : this.files) {
+            if (f.getId().equals(file)) {
+                fileObject = f;
+            }
+        }
+        if (fileObject == null) {
+            fileObject = this.files.get(0);
+        }
+        logs = this.filedPagedLogs.get(fileObject).get(page);
         if (logs.size() > 0) {
-            if (logs.size() > (page * 50)) {
+            if (this.filedPagedLogs.get(fileObject).size() > page - 1) {
                 model.addAttribute("next", true);
             }
             if (page > 1) {
                 model.addAttribute("back", true);
             }
-            List<Log> logsList = logs.subList(((page - 1) * 50), (page * 50));
+            ArrayList<File> fileList = (ArrayList<File>) fileRepository.findAll();
+            List<HashMap<String, Object>> files = new ArrayList<>();
+            for (File f : fileList) {
+                files.add(FileToHashMap(f));
+            }
             List<HashMap<String, Object>> rows = new ArrayList<>();
-            for (Log log : logsList) {
+            for (Log log : logs) {
                 rows.add(LogToHashMap(log));
             }
-                model.addAttribute("list", rows);
+            model.addAttribute("files", files);
+            model.addAttribute("page", page);
+            model.addAttribute("list", rows);
         }
         return new ModelAndView("index");
     }
@@ -126,8 +154,12 @@ public class IndexController {
             else {
                 rowsMapList.forEach(row -> logs.add(new Log(row.get("hash").toString(), row.get("row").toString(), (Integer) row.get("count"), fileClass)));
             }
+            this.logs = logs;
+            this.files = (ArrayList<File>) fileRepository.findAll();
+            this.pagedLogs = new HashMap<>();
+            this.setPagedLogs();
             new AsyncSave(logs, fileClass, logRepository, fileRepository).start();
-            return getIndex(model, null, logs);
+            return getIndex(model, null, null);
         }
     }
     private ArrayList<Object> HashPropertyArray(ArrayList<HashMap<String, Object>> list, String property) {
@@ -143,6 +175,34 @@ public class IndexController {
         map.put("count", log.getCount());
         map.put("row", log.getRow());
         return map;
+    }
+
+    private HashMap<String, Object> FileToHashMap(File file) {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("id", file.getId());
+        map.put("name", file.getFilename());
+        return map;
+    }
+
+    private void setPagedLogs() {
+        for (int i = 0; i < this.logs.size(); i++) {
+            if (i % 50 == 0) {
+                ArrayList<Log> sublist = new ArrayList<>(this.logs.subList(i, (i + 50 > this.logs.size() ? this.logs.size() : i + 50)));
+                this.pagedLogs.put((i / 50) + 1, sublist);
+            }
+            File file = this.logs.get(i).getFileid();
+            if (!this.filedPagedLogs.containsKey(file)) {
+                HashMap<Integer, ArrayList<Log>> map = new HashMap<>();
+                map.put(1, new ArrayList<>());
+                this.filedPagedLogs.put(file, map);
+            }
+            Set pages = this.filedPagedLogs.get(file).keySet();
+            int page = pages.size();
+            if (this.filedPagedLogs.get(file).get(page).size() == 50) {
+                this.filedPagedLogs.get(file).put(++page, new ArrayList<>());
+            }
+            this.filedPagedLogs.get(file).get(page).add(this.logs.get(i));
+        }
     }
 
     @RequestMapping(path="/500")

@@ -1,6 +1,6 @@
 <html xmlns:th="http://www.w3.org/1999/xhtml">
     <head>
-        <title>Cyber</title>
+        <title>Netstat</title>
     </head>
     <body>
     <th:block th:insert="~{header::copy}"></th:block>
@@ -11,8 +11,16 @@
     </form>
     <h3 th:if="${error}" th:text="${error}"></h3>
     <div>
-        <button th:if="${back}" class="btn btn-primary" style="display: inline-block" onclick="previousPage()">Previous</button>
-        <button th:if="${next}" class="btn btn-primary" style="display: inline-block" onclick="nextPage()">Next</button>
+        <form method="get" action="/">a
+            <select name="file">
+                <th:block th:each="item : ${files}">
+                    <option th:value="${item.id}" th:text="${item.name}"></option>
+                </th:block>
+            </select>
+            <input name="page" style="display: none;" id="page">
+            <input th:if="${back}" th:onmouseenter="${'document.getElementById(''page'').value =' + (page - 1)}" class="btn btn-primary" style="display: inline-block" type="submit" value="Previous page">
+            <input th:if="${next}" th:onmouseenter="${'document.getElementById(''page'').value =' + (page + 1)}" class="btn btn-primary" style="display: inline-block" type="submit" value="Next Page">
+        </form>
     </div>
     <div class="cont" th:if="${list}">
         <table class="table table-striped">
@@ -35,32 +43,5 @@
         </table>
     </div>
     <th:block th:insert="~{footer::copy}"></th:block>
-    <script>
-        function getPage() {
-            let qs = window.location.search.substr(1).split("&");
-            if (qs.length > 0) {
-                for (let q in qs) {
-                    q = qs[q];
-                    q = q.split("=");
-                    if (q[0] === "page") {
-                        return parseInt(q[1]);
-                    }
-                }
-                return 1;
-            }
-            else
-                return 1;
-
-        }
-
-        function nextPage() {
-            let page = getPage();
-            window.location = "/?page=" + (page + 1);
-        }
-        function previousPage() {
-            let page = getPage();
-            window.location = "/?page=" + (page - 1);
-        }
-    </script>
     </body>
 </html>
