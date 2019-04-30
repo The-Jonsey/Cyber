@@ -16,6 +16,7 @@ public class File {
     private Integer id;
     private String filename;
     private Date uploaded;
+    private String columns;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "fileid")
     private Set<Log> logs = new HashSet<>();
@@ -24,9 +25,10 @@ public class File {
 
     }
 
-    public File(String filename, Date uploaded) {
+    public File(String filename, Date uploaded, String columns) {
         this.filename = filename;
         this.uploaded = uploaded;
+        this.columns = columns;
     }
 
     public Integer getId() {
@@ -59,5 +61,13 @@ public class File {
 
     public void setLogs(Set<Log> logs) {
         this.logs = logs;
+    }
+
+    public String getColumns() {
+        return columns;
+    }
+
+    public void setColumns(String columns) {
+        this.columns = columns;
     }
 }

@@ -13,10 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.ServletContext;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Controller
 public class IndexController {
@@ -39,12 +36,10 @@ public class IndexController {
         boolean itemchanged = false;
         if (App.logs.isEmpty()) {
             App.logs = (ArrayList<Log>) logRepository.findAll();
-            System.out.println(App.logs);
             itemchanged = true;
         }
         if (App.files.isEmpty()) {
             App.files = (ArrayList<File>) fileRepository.findAll();
-            System.out.println(App.files);
             itemchanged = true;
         }
         if (App.pagedLogs.isEmpty() || itemchanged) {
@@ -85,8 +80,11 @@ public class IndexController {
             }
             List<HashMap<String, Object>> rows = new ArrayList<>();
             for (Log log : logs) {
-                rows.add(LogToHashMap(log));
+                rows.add(LogToHashMap(log, fileObject.getColumns().split(",")));
             }
+            ArrayList<String> cols = new ArrayList<>(Arrays.asList(fileObject.getColumns().split(",")));
+            cols.add(0, "Count");
+            model.addAttribute("columns", cols);
             model.addAttribute("files", files);
             model.addAttribute("page", page);
             model.addAttribute("list", rows);
@@ -95,11 +93,13 @@ public class IndexController {
     }
 
 
-    private HashMap<String, Object> LogToHashMap(Log log) {
+    private HashMap<String, Object> LogToHashMap(Log log, String[] columns) {
         HashMap<String, Object> map = new HashMap<>();
-        map.put("hash", log.getHash());
-        map.put("count", log.getCount());
-        map.put("row", log.getRow());
+        map.put("Count", log.getCount());
+        String[] logSplit = log.getRow().split(",");
+        for (int i = 0; i < logSplit.length; i++) {
+            map.put(columns[i], logSplit[i]);
+        }
         return map;
     }
 
@@ -107,6 +107,8 @@ public class IndexController {
         HashMap<String, Object> map = new HashMap<>();
         map.put("id", file.getId());
         map.put("name", file.getFilename());
+        map.put("date", file.getUploaded());
+        map.put("columns", file.getColumns());
         return map;
     }
 

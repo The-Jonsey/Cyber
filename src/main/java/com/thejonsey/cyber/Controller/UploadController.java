@@ -50,7 +50,7 @@ public class UploadController {
         ArrayList<Integer> selectedHeaders = new ArrayList<>();
         System.out.println(allRequestParams.keySet());
         for (int i = 0; i < headers.size(); i++) {
-            if (!allRequestParams.containsKey(headers.get(i))) {
+            if (allRequestParams.containsKey(headers.get(i))) {
                 selectedHeaders.add(i);
             }
         }
@@ -59,20 +59,22 @@ public class UploadController {
             return getUpload(model);
         }
         MultipartFile multipartFile = file.getFile();
-        File fileClass = new File(multipartFile.getOriginalFilename(), new Date(System.currentTimeMillis()));
+        File fileClass = new File(multipartFile.getOriginalFilename(), new Date(System.currentTimeMillis()), String.join(",", allRequestParams.keySet()));
         String content = new String(multipartFile.getBytes(), StandardCharsets.UTF_8);
         HashMap<String, Integer> rowsMap = new HashMap<>();
         String[] rowsSplit = content.split("\n");
         for (int x = 0; x < rowsSplit.length; x++) {
             ArrayList<String> rowList = new ArrayList<>(Arrays.asList(rowsSplit[x].split(",")));
-            for (int i = rowList.size() - 1; i > 0; i--) {
-                if (!selectedHeaders.contains(i)) {
-                    rowList.remove(i);
+            ArrayList<String> rowListNew = new ArrayList<>();
+            int size = rowList.size();
+            for (int i = 0; i < rowList.size(); i++) {
+                if (selectedHeaders.contains(i)) {
+                    rowListNew.add(rowList.get(i));
                 }
             }
-            rowsSplit[x] = String.join(",", rowList);
+            rowsSplit[x] = String.join(",", rowListNew);
         }
-        for (String row : content.split("\n")) {
+        for (String row : rowsSplit) {
             if (rowsMap.containsKey(row)) {
                 rowsMap.put(row, rowsMap.get(row) + 1);
             }

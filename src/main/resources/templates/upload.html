@@ -8,7 +8,6 @@
 <th:block th:insert="~{header::copy}"></th:block>
 <form action="/upload" method="POST" enctype="multipart/form-data">
     <input class="form-control-file" name="file" type="file" accept="text/csv" required>
-    <input class="form-control" name="seperator" type="text" maxlength="1" placeholder="seperator" required>
     <h4>Select headers to group by</h4>
     <div>
         <th:block th:each="header : ${headers}">

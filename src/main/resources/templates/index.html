@@ -9,7 +9,7 @@
             <form method="get" action="/">
                 <select name="file">
                     <th:block th:each="item : ${files}">
-                        <option th:value="${item.id}" th:text="${item.name}"></option>
+                        <option th:value="${item.id}" th:text="|${item.name} - ${item.date}|"></option>
                     </th:block>
                 </select>
                 <input name="page" style="display: none;" id="page">
@@ -20,17 +20,17 @@
         <table class="table table-striped">
             <thead>
             <tr>
-                <th>Count</th>
-                <th>Row</th>
-                <th>Hash</th>
+                <th:block th:each="column : ${columns}">
+                    <th th:text="${column}"></th>
+                </th:block>
             </tr>
             </thead>
             <div style="display: contents;">
                 <tbody>
                 <th:block th:each="map : ${list}">
                     <tr>
-                        <th:block th:each="entry : ${map}">
-                            <td th:text="${entry.value}"></td>
+                        <th:block th:each="column : ${columns}">
+                            <td th:text="${map.get(column)}"></td>
                         </th:block>
                     </tr>
                 </th:block>
