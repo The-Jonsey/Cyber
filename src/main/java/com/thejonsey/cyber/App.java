@@ -2,6 +2,7 @@ package com.thejonsey.cyber;
 
 import com.thejonsey.cyber.Controller.IndexController;
 import com.thejonsey.cyber.Model.*;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -18,13 +19,17 @@ public class App extends SpringBootServletInitializer {
 	public static HashMap<Integer, ArrayList<Log>> pagedLogs = new HashMap<>();
 	public static HashMap<File, HashMap<Integer, ArrayList<Log>>> filedPagedLogs = new HashMap<>();
 	public static HashMap<File, ArrayList<Filter>> filters = new HashMap<>();
-
+	private static boolean filled = false;
 	@Autowired
 	public App(FilterRepository filterRepository, FileRepository fileRepository, LogRepository logRepository) {
-		logs = (ArrayList<Log>) logRepository.findAll();
-		files = (ArrayList<File>) fileRepository.findAll();
-		App.files.forEach(f -> App.filters.put(f, filterRepository.findAllByFileid(f)));
-		IndexController.setPagedLogs();
+		if (!filled) {
+			filled = true;
+			logs = (ArrayList<Log>) logRepository.findAll();
+			files = (ArrayList<File>) fileRepository.findAll();
+			App.files.forEach(f -> App.filters.put(f, filterRepository.findAllByFileid(f)));
+			IndexController.setPagedLogs();
+			System.out.println("finit");
+		}
 	}
 
 	public static void main(String[] args) {

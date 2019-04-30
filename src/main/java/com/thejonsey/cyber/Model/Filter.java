@@ -45,7 +45,7 @@ public class Filter {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String filter;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "fileid")
     private File fileid;
 }

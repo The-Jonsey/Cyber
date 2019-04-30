@@ -27,7 +27,6 @@ import java.util.Map;
 @Controller
 @RequestMapping(path="/upload")
 public class UploadController {
-    private final ArrayList<Integer> headers = new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39));
     private LogRepository logRepository;
     private FileRepository fileRepository;
     private FilterRepository filterRepository;
@@ -41,7 +40,6 @@ public class UploadController {
 
     @GetMapping()
     public ModelAndView getUpload(ModelMap model) {
-        model.addAttribute("headers", headers);
         return new ModelAndView("upload");
     }
 
@@ -50,7 +48,7 @@ public class UploadController {
         ArrayList<Integer> selectedHeaders = new ArrayList<>();
         System.out.println(allRequestParams.keySet());
         for (int i = 0; i < allRequestParams.keySet().size(); i++) {
-            selectedHeaders.add(i);
+            selectedHeaders.add(Integer.parseInt(allRequestParams.keySet().toArray()[i].toString()));
         }
         if (result.hasErrors()) {
             model.addAttribute("error", "The file failed to validate");
@@ -60,6 +58,7 @@ public class UploadController {
         File fileClass = new File(multipartFile.getOriginalFilename(), new Date(System.currentTimeMillis()));
         String content = new String(multipartFile.getBytes(), StandardCharsets.UTF_8);
         HashMap<String, Integer> rowsMap = new HashMap<>();
+        content = content.replaceAll("\r", "");
         String[] rowsSplit = content.split("\n");
         for (int x = 0; x < rowsSplit.length; x++) {
             ArrayList<String> rowList = new ArrayList<>(Arrays.asList(rowsSplit[x].split(",")));

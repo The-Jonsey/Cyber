@@ -67,10 +67,12 @@ public class IndexController {
         if (fileObject == null) {
             fileObject = App.files.get(0);
         }
+        System.out.println(App.filedPagedLogs.keySet());
+        System.out.println(fileObject);
         ArrayList<Log> logs = App.filedPagedLogs.get(fileObject).get(page);
         // endregion
         if (logs.size() > 0) {
-            if (App.filedPagedLogs.get(fileObject).size() > page - 1) {
+            if (App.filedPagedLogs.get(fileObject).size() > page) {
                 model.addAttribute("next", true);
             }
             if (page > 1) {
@@ -95,6 +97,7 @@ public class IndexController {
             cols.add(0, "Count");
             model.addAttribute("columns", cols);
             model.addAttribute("files", files);
+            model.addAttribute("file", fileObject.getId());
             model.addAttribute("page", page);
             model.addAttribute("list", rows);
         }
@@ -122,16 +125,24 @@ public class IndexController {
     }
 
     public static void setPagedLogs() {
+        for (File file : App.files) {
+            if (!App.filedPagedLogs.containsKey(file)) {
+                HashMap<Integer, ArrayList<Log>> map = new HashMap<>();
+                map.put(1, new ArrayList<>());
+                App.filedPagedLogs.put(file, map);
+            }
+        }
         for (int i = 0; i < App.logs.size(); i++) {
             if (i % 50 == 0) {
                 ArrayList<Log> sublist = new ArrayList<>(App.logs.subList(i, (i + 50 > App.logs.size() ? App.logs.size() : i + 50)));
                 App.pagedLogs.put((i / 50) + 1, sublist);
             }
             File file = App.logs.get(i).getFileid();
-            if (!App.filedPagedLogs.containsKey(file)) {
-                HashMap<Integer, ArrayList<Log>> map = new HashMap<>();
-                map.put(1, new ArrayList<>());
-                App.filedPagedLogs.put(file, map);
+            for (File file1 : App.files) {
+                if (file1.getId().equals(file.getId())) {
+                    file = file1;
+                    break;
+                }
             }
             Set pages = App.filedPagedLogs.get(file).keySet();
             int page = pages.size();
@@ -140,6 +151,7 @@ public class IndexController {
             }
             App.filedPagedLogs.get(file).get(page).add(App.logs.get(i));
         }
+        System.out.println(App.filedPagedLogs);
     }
 
     @RequestMapping(path="/500")

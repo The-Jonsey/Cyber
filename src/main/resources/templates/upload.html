@@ -7,19 +7,52 @@
 <body>
 <th:block th:insert="~{header::copy}"></th:block>
 <form action="/upload" method="POST" enctype="multipart/form-data">
-    <input class="form-control-file" name="file" type="file" accept="text/csv" required>
+    <input id="file" class="form-control-file" name="file" type="file" accept="text/csv" required>
     <h4>Select headers to group by</h4>
-    <div>
-        <th:block th:each="header : ${headers}">
-            <label th:text="${header}"></label>
-            <input type="checkbox" th:name="${header}">
-        </th:block>
+    <div id="checkboxes">
     </div>
+    <button class="btn btn-primary" id="select">Select all</button>
     <input class="btn btn-primary" type="submit" value="Upload">
 </form>
 <h3 th:if="${error}" th:text="${error}"></h3>
-<script th:if="${pass}">
-    window.location = "/";
+<th:block th:insert="~{footer::copy}"></th:block>
+<script>
+    let select = document.getElementById("select");
+    select.onclick = () => {
+        let checkboxes = document.querySelectorAll("[type='checkbox']");
+        checkboxes.forEach(checkbox => {
+            checkbox.setAttribute("checked", true);
+        });
+    };
+
+    let fileInput = document.getElementById("file");
+    fileInput.onchange = function() {
+        if (fileInput.files.length > 0) {
+            if (fileInput.files[0].type != "text/csv") {
+                fileInput.files.pop();
+                fileInput.value = "";
+                alert("Please upload a CSV");
+                return;
+            }
+            let div = document.getElementById("checkboxes");
+            $(div).empty();
+            let fileReader = new FileReader();
+            fileReader.onload = () => {
+                let file = fileReader.result;
+                for (x = 0; x < file.split("\n")[0].split(",").length; x++) {
+                    let label = document.createElement("label");
+                    label.innerText = x;
+                    let input = document.createElement("input");
+                    input.setAttribute("type", "checkbox");
+                    input.setAttribute("name", x);
+                    div.appendChild(label);
+                    div.appendChild(input);
+                }
+            }
+            fileReader.readAsText(fileInput.files[0]);
+
+        }
+    }
 </script>
 </body>
 </html>

@@ -15,7 +15,7 @@ public class Log {
 
     //@OneToMany(mappedBy = "File", cascade = CascadeType.ALL)
     //@JoinColumn(table = "File", name = "id")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "fileid")
     private File fileid;
 
