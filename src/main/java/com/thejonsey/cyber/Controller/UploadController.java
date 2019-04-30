@@ -4,10 +4,7 @@ import com.thejonsey.cyber.App;
 import com.thejonsey.cyber.Classes.AsyncSave;
 import com.thejonsey.cyber.Classes.FileModel;
 import com.thejonsey.cyber.Classes.HashMapComparator;
-import com.thejonsey.cyber.Model.File;
-import com.thejonsey.cyber.Model.FileRepository;
-import com.thejonsey.cyber.Model.Log;
-import com.thejonsey.cyber.Model.LogRepository;
+import com.thejonsey.cyber.Model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -28,38 +25,39 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Controller
+@RequestMapping(path="/upload")
 public class UploadController {
-    private final ArrayList<String> headers = new ArrayList<>(Arrays.asList("duration","protocol_type","service","flag","src_bytes","dst_bytes","land","wrong_fragment","urgent","hot","num_failed_logins","logged_in","num_compromised","root_shell","su_attempted","num_root","num_file_creations","num_shells","num_access_files","num_outbound_cmds","is_host_login","is_guest_login","count","srv_count","serror_rate","srv_serror_rate","same_srv_rate","diff_srv_rate","srv_diff_host_rate","dst_host_count","dst_host_srv_count","dst_host_same_srv_rate","dst_host_diff_srv_rate","dst_host_same_src_port_rate","dst_host_srv_diff_host_rate","dst_host_serror_rate","dst_host_srv_serror_rate","dst_host_rerror_rate","dst_host_srv_rerror_rate"));
+    private final ArrayList<Integer> headers = new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39));
     private LogRepository logRepository;
     private FileRepository fileRepository;
+    private FilterRepository filterRepository;
 
     @Autowired
-    public UploadController(LogRepository logRepository, FileRepository fileRepository) {
+    public UploadController(LogRepository logRepository, FileRepository fileRepository, FilterRepository filterRepository) {
         this.logRepository = logRepository;
         this.fileRepository = fileRepository;
+        this.filterRepository = filterRepository;
     }
 
-    @GetMapping(path="/upload")
+    @GetMapping()
     public ModelAndView getUpload(ModelMap model) {
         model.addAttribute("headers", headers);
         return new ModelAndView("upload");
     }
 
-    @RequestMapping(path = "/upload", method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.POST)
     public ModelAndView fileUpload(@Validated FileModel file, @RequestParam Map<String,String> allRequestParams, BindingResult result, ModelMap model) throws IOException {
         ArrayList<Integer> selectedHeaders = new ArrayList<>();
         System.out.println(allRequestParams.keySet());
-        for (int i = 0; i < headers.size(); i++) {
-            if (allRequestParams.containsKey(headers.get(i))) {
-                selectedHeaders.add(i);
-            }
+        for (int i = 0; i < allRequestParams.keySet().size(); i++) {
+            selectedHeaders.add(i);
         }
         if (result.hasErrors()) {
             model.addAttribute("error", "The file failed to validate");
             return getUpload(model);
         }
         MultipartFile multipartFile = file.getFile();
-        File fileClass = new File(multipartFile.getOriginalFilename(), new Date(System.currentTimeMillis()), String.join(",", allRequestParams.keySet()));
+        File fileClass = new File(multipartFile.getOriginalFilename(), new Date(System.currentTimeMillis()));
         String content = new String(multipartFile.getBytes(), StandardCharsets.UTF_8);
         HashMap<String, Integer> rowsMap = new HashMap<>();
         String[] rowsSplit = content.split("\n");
@@ -124,8 +122,13 @@ public class UploadController {
         App.files.add(fileClass);
         App.pagedLogs = new HashMap<>();
         IndexController.setPagedLogs();
-        new AsyncSave(logs, logRepository).start();
-        return new IndexController(this.logRepository, this.fileRepository).getIndex(model, 1, fileClass.getId());
+        ArrayList<Filter> filters = new ArrayList<>();
+        allRequestParams.keySet().forEach(filter -> {
+            filters.add(new Filter(filter, fileClass));
+        });
+        App.filters.put(fileClass, filters);
+        new AsyncSave(logs, logRepository, filters, filterRepository).start();
+        return new IndexController(this.logRepository, this.fileRepository, this.filterRepository).getIndex(model, 1, fileClass.getId());
     }
 
     private ArrayList<Object> HashPropertyArray(ArrayList<HashMap<String, Object>> list, String property) {

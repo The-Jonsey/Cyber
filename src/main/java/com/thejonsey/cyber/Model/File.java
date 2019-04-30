@@ -16,19 +16,28 @@ public class File {
     private Integer id;
     private String filename;
     private Date uploaded;
-    private String columns;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "fileid")
     private Set<Log> logs = new HashSet<>();
+
+    public Set<Filter> getFilters() {
+        return filters;
+    }
+
+    public void setFilters(Set<Filter> filters) {
+        this.filters = filters;
+    }
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "fileid")
+    private Set<Filter> filters = new HashSet<>();
 
     public File() {
 
     }
 
-    public File(String filename, Date uploaded, String columns) {
+    public File(String filename, Date uploaded) {
         this.filename = filename;
         this.uploaded = uploaded;
-        this.columns = columns;
     }
 
     public Integer getId() {
@@ -61,13 +70,5 @@ public class File {
 
     public void setLogs(Set<Log> logs) {
         this.logs = logs;
-    }
-
-    public String getColumns() {
-        return columns;
-    }
-
-    public void setColumns(String columns) {
-        this.columns = columns;
     }
 }

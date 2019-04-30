@@ -1,9 +1,6 @@
 package com.thejonsey.cyber.Controller;
 
-import com.thejonsey.cyber.Model.File;
-import com.thejonsey.cyber.Model.FileRepository;
-import com.thejonsey.cyber.Model.Log;
-import com.thejonsey.cyber.Model.LogRepository;
+import com.thejonsey.cyber.Model.*;
 import com.thejonsey.cyber.App;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,21 +13,23 @@ import javax.servlet.ServletContext;
 import java.util.*;
 
 @Controller
+@RequestMapping(path = "/")
 public class IndexController {
-
     private final LogRepository logRepository;
     private final FileRepository fileRepository;
+    private final FilterRepository filterRepository;
+
     @Autowired
-    public IndexController(LogRepository logRepository, FileRepository fileRepository) {
+    public IndexController(LogRepository logRepository, FileRepository fileRepository, FilterRepository filterRepository) {
         this.logRepository = logRepository;
         this.fileRepository = fileRepository;
+        this.filterRepository = filterRepository;
     }
 
     @Autowired
     ServletContext context;
 
-
-    @GetMapping(path="/")
+    @GetMapping()
     ModelAndView getIndex(ModelMap model, @RequestParam(required = false) Integer page, @RequestParam(required = false) Integer file) {
         // region cache access
         boolean itemchanged = false;
@@ -45,6 +44,11 @@ public class IndexController {
         if (App.pagedLogs.isEmpty() || itemchanged) {
             setPagedLogs();
         }
+        if (App.filters.isEmpty()) {
+            App.files.forEach(f -> {
+                App.filters.put(f, filterRepository.findAllByFileid(f));
+            });
+        }
         if (page == null) {
             page = 1;
         }
@@ -55,7 +59,6 @@ public class IndexController {
             file = App.files.get(0).getId();
         }
         File fileObject = null;
-        System.out.println(file);
         for (File f : App.files) {
             if (f.getId().equals(file)) {
                 fileObject = f;
@@ -74,15 +77,21 @@ public class IndexController {
                 model.addAttribute("back", true);
             }
             ArrayList<File> fileList = (ArrayList<File>) fileRepository.findAll();
+            ArrayList<Filter> filters = App.filters.get(fileObject);
+            System.out.println("Size: " + filters.size());
+            String[] col = new String[filters.size()];
+            for (int i = 0; i < filters.size(); i++) {
+                col[i] = filters.get(i).getFilter();
+            }
             List<HashMap<String, Object>> files = new ArrayList<>();
             for (File f : fileList) {
-                files.add(FileToHashMap(f));
+                files.add(FileToHashMap(f, col));
             }
             List<HashMap<String, Object>> rows = new ArrayList<>();
             for (Log log : logs) {
-                rows.add(LogToHashMap(log, fileObject.getColumns().split(",")));
+                rows.add(LogToHashMap(log, col));
             }
-            ArrayList<String> cols = new ArrayList<>(Arrays.asList(fileObject.getColumns().split(",")));
+            ArrayList<String> cols = new ArrayList<>(Arrays.asList(col));
             cols.add(0, "Count");
             model.addAttribute("columns", cols);
             model.addAttribute("files", files);
@@ -103,16 +112,16 @@ public class IndexController {
         return map;
     }
 
-    private HashMap<String, Object> FileToHashMap(File file) {
+    private HashMap<String, Object> FileToHashMap(File file, String[] col) {
         HashMap<String, Object> map = new HashMap<>();
         map.put("id", file.getId());
         map.put("name", file.getFilename());
         map.put("date", file.getUploaded());
-        map.put("columns", file.getColumns());
+        map.put("columns", col);
         return map;
     }
 
-    static void setPagedLogs() {
+    public static void setPagedLogs() {
         for (int i = 0; i < App.logs.size(); i++) {
             if (i % 50 == 0) {
                 ArrayList<Log> sublist = new ArrayList<>(App.logs.subList(i, (i + 50 > App.logs.size() ? App.logs.size() : i + 50)));
