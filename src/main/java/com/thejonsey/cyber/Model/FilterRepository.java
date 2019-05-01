@@ -7,5 +7,5 @@ import java.util.ArrayList;
 import java.util.List;
 
 public interface FilterRepository extends CrudRepository<Filter, Integer> {
-    ArrayList<Filter> findAllByFileid(File fileid);
+    public ArrayList<Filter> findAllByFileid(File fileid);
 }

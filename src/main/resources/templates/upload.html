@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <title>Netstat - Upload</title>
@@ -11,7 +11,7 @@
     <h4>Select headers to group by</h4>
     <div id="checkboxes">
     </div>
-    <button class="btn btn-primary" id="select">Select all</button>
+    <button type="button" class="btn btn-primary" id="select">Select all</button>
     <input class="btn btn-primary" type="submit" value="Upload">
 </form>
 <h3 th:if="${error}" th:text="${error}"></h3>
@@ -28,8 +28,7 @@
     let fileInput = document.getElementById("file");
     fileInput.onchange = function() {
         if (fileInput.files.length > 0) {
-            if (fileInput.files[0].type != "text/csv") {
-                fileInput.files.pop();
+            if (fileInput.files[0].type !== "text/csv") {
                 fileInput.value = "";
                 alert("Please upload a CSV");
                 return;

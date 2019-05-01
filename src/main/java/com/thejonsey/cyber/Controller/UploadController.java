@@ -12,6 +12,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -45,8 +46,8 @@ public class UploadController {
 
     @RequestMapping(method = RequestMethod.POST)
     public ModelAndView fileUpload(@Validated FileModel file, @RequestParam Map<String,String> allRequestParams, BindingResult result, ModelMap model) throws IOException {
+    //public ModelAndView fileUpload(MultipartHttpServletRequest req, @RequestParam Map<String,String> allRequestParams, BindingResult result, ModelMap model) throws IOException {
         ArrayList<Integer> selectedHeaders = new ArrayList<>();
-        System.out.println(allRequestParams.keySet());
         for (int i = 0; i < allRequestParams.keySet().size(); i++) {
             selectedHeaders.add(Integer.parseInt(allRequestParams.keySet().toArray()[i].toString()));
         }
@@ -97,25 +98,10 @@ public class UploadController {
             }
         });
         rowsMapList.sort(new HashMapComparator());
-        ArrayList<Log> logs = (ArrayList<Log>) logRepository.findAll();
-        if (logs.size() > 0) {
-            ArrayList<String> hashes = new ArrayList<>();
-            logs.forEach(log -> hashes.add(log.getHash()));
-            rowsMapList.forEach(row -> {
-                if (hashes.contains(row.get("hash").toString())) {
-                    int index = hashes.indexOf(row.get("hash").toString());
-                    Log log = logs.get(index);
-                    log.setCount(log.getCount() + (Integer) row.get("count"));
-                }
-                else {
-                    logs.add(new Log(row.get("hash").toString(), row.get("row").toString(), (Integer) row.get("count"), fileClass));
-                }
-            });
-        }
-        else {
-            rowsMapList.forEach(row -> logs.add(new Log(row.get("hash").toString(), row.get("row").toString(), (Integer) row.get("count"), fileClass)));
-        }
+        ArrayList<Log> logs = new ArrayList<>();
+        rowsMapList.forEach(row -> logs.add(new Log(row.get("hash").toString(), row.get("row").toString(), (Integer) row.get("count"), fileClass)));
         //cache updating
+        App.logs.addAll(logs);
         App.logs = logs;
         fileRepository.save(fileClass);
         App.files.add(fileClass);
@@ -126,6 +112,7 @@ public class UploadController {
             filters.add(new Filter(filter, fileClass));
         });
         App.filters.put(fileClass, filters);
+        System.out.println(logs.size());
         new AsyncSave(logs, logRepository, filters, filterRepository).start();
         return new IndexController(this.logRepository, this.fileRepository, this.filterRepository).getIndex(model, 1, fileClass.getId());
     }

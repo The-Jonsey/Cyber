@@ -67,8 +67,6 @@ public class IndexController {
         if (fileObject == null) {
             fileObject = App.files.get(0);
         }
-        System.out.println(App.filedPagedLogs.keySet());
-        System.out.println(fileObject);
         ArrayList<Log> logs = App.filedPagedLogs.get(fileObject).get(page);
         // endregion
         if (logs.size() > 0) {
@@ -80,7 +78,6 @@ public class IndexController {
             }
             ArrayList<File> fileList = (ArrayList<File>) fileRepository.findAll();
             ArrayList<Filter> filters = App.filters.get(fileObject);
-            System.out.println("Size: " + filters.size());
             String[] col = new String[filters.size()];
             for (int i = 0; i < filters.size(); i++) {
                 col[i] = filters.get(i).getFilter();
@@ -151,7 +148,6 @@ public class IndexController {
             }
             App.filedPagedLogs.get(file).get(page).add(App.logs.get(i));
         }
-        System.out.println(App.filedPagedLogs);
     }
 
     @RequestMapping(path="/500")
