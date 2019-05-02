@@ -7,8 +7,9 @@ addons:
 before_install:
   - mysql -e 'CREATE DATABASE Cyber; GRANT ALL PRIVILEGES ON Cyber.* TO "spring"@"localhost" IDENTIFIED BY "cyber"; FLUSH PRIVILEGES;'
 script:
-  - mvn install
   - docker-compose up --build -d
+  - sed -i 's/mysql:3306/localhost:3306/g' src/main/resources/application.properties
+  - mvn install
 deploy:
   provider: script
   script: sh deploy.sh $word
