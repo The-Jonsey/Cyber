@@ -29,6 +29,7 @@ public class IndexController {
 
     @GetMapping()
     ModelAndView getIndex(ModelMap model, @RequestParam(required = false) Integer page, @RequestParam(required = false) Integer file) {
+        model.addAttribute("title", App.title);
         // region validate and regenerate cache
         boolean itemchanged = false;
         if (App.logs.isEmpty()) {

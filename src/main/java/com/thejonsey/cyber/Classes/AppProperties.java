@@ -19,6 +19,7 @@ public class AppProperties {
 
     private Integer page_size;
     private Integer analysis_amount;
+    private String title;
 
     public Integer getAnalysis_amount() {
         return analysis_amount;
@@ -26,5 +27,13 @@ public class AppProperties {
 
     public void setAnalysis_amount(Integer analysis_amount) {
         this.analysis_amount = analysis_amount;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 }

@@ -2,11 +2,11 @@
 <html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
     <head>
         <meta charset="UTF-8">
-        <title>Netstat - Analysis</title>
+        <title th:text="${title + ' - Analysis'}"></title>
         <link rel="stylesheet" href="static/css/index.css">
     </head>
     <body>
-        <th:block th:insert="~{header::copy}"></th:block>
+    <th:block th:insert="header :: copy(${title})"></th:block>
         <div class="container-fluid" style="position: relative">
             <div class="col-md-5" style="display: inline-block">
                 <canvas id="myChart" width="400" height="400"></canvas>

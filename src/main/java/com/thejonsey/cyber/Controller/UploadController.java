@@ -33,6 +33,7 @@ public class UploadController {
 
     @GetMapping()
     public ModelAndView getUpload(ModelMap model) {
+        model.addAttribute("title", App.title);
         return new ModelAndView("upload");
     }
 

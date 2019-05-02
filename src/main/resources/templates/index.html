@@ -1,9 +1,9 @@
 <html xmlns:th="http://www.w3.org/1999/xhtml">
     <head>
-        <title>Netstat</title>
+        <title th:text="${title}"></title>
     </head>
     <body>
-    <th:block th:insert="~{header::copy}"></th:block>
+    <th:block th:insert="header :: copy(${title})"></th:block>
     <div class="cont" th:if="${list}">
         <div>
             <form method="get" action="/">

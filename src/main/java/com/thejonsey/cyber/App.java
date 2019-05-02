@@ -52,6 +52,7 @@ public class App extends SpringBootServletInitializer {
 	//region config variables
 	private static Integer page_size;
 	public static Integer analysis_amount;
+	public static String title;
 	//endregion
 	//region cache variables
 	public static ArrayList<Log> logs = new ArrayList<>();
@@ -64,6 +65,7 @@ public class App extends SpringBootServletInitializer {
 	public App(FilterRepository filterRepository, FileRepository fileRepository, LogRepository logRepository, AppProperties appProperties) {
 		App.page_size = appProperties.getPage_size();
 		App.analysis_amount = appProperties.getAnalysis_amount();
+		App.title = appProperties.getTitle();
 		//region Generates cache
 		logs = (ArrayList<Log>) logRepository.findAll();
 		files = (ArrayList<File>) fileRepository.findAll();

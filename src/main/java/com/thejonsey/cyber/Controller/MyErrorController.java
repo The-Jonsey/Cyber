@@ -1,5 +1,6 @@
 package com.thejonsey.cyber.Controller;
 
+import com.thejonsey.cyber.App;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.boot.web.servlet.error.ErrorController;
@@ -33,11 +34,12 @@ public class MyErrorController implements ErrorController {
     }
 
     @RequestMapping
-    public ModelAndView handleError(HttpServletRequest request, WebRequest webRequest, ModelMap map) {
+    public ModelAndView handleError(HttpServletRequest request, WebRequest webRequest, ModelMap model) {
+        model.addAttribute("title", App.title);
         Object status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
         RequestAttributes requestAttributes = new ServletRequestAttributes(request);
         Map<String, Object> Error = this.errorAttributes.getErrorAttributes(webRequest, true);
-         Error.forEach(map::addAttribute);
+         Error.forEach(model::addAttribute);
         if (status != null) {
             Integer statusCode = Integer.valueOf(status.toString());
 

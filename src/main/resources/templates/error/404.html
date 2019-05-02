@@ -5,7 +5,7 @@
     <title>Error 404</title>
 </head>
 <body>
-<th:block th:insert="~{header::copy}"></th:block>
+<th:block th:insert="header :: copy(${title})"></th:block>
 <div style="display: flex; justify-content: center; align-items: center; flex-direction: column">
     <!--<img src="/static/img/404.png" alt="404" height="250px">-->
     <img src="/static/img/404.gif" height="200px">

@@ -73,6 +73,7 @@ public class AnalysisController {
             //endregion
         }
         //region attributes for rendering engine
+        model.addAttribute("title", App.title);
         model.addAttribute("columnCounts", countsJson);
         model.addAttribute("columnJSON", new JSONObject(countsJson));
         //endregion

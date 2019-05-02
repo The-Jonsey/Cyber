@@ -2,10 +2,10 @@
 <html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
-    <title>Netstat - Upload</title>
+    <title th:text="${title + ' - Upload'}"></title>
 </head>
 <body>
-<th:block th:insert="~{header::copy}"></th:block>
+<th:block th:insert="header :: copy(${title})"></th:block>
 <form action="/upload" method="POST" enctype="multipart/form-data">
     <input id="file" class="form-control-file" name="file" type="file" accept="text/csv" required>
     <h4>Select headers to group by</h4>

@@ -5,7 +5,7 @@
     <title>Error</title>
 </head>
 <body>
-<th:block th:insert="~{header::copy}"></th:block>
+<th:block th:insert="header :: copy(${title})"></th:block>
 <div
         th:if="${message} or ${trace}">
     <b>Cause: </b> <span th:if="${message}" th:text="${message}">exception ...</span>
