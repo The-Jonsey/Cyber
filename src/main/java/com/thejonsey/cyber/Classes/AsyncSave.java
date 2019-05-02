@@ -1,12 +1,11 @@
 package com.thejonsey.cyber.Classes;
 
 import com.thejonsey.cyber.Model.*;
-
-import java.sql.Array;
-import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Set;
 
+/**
+ * Saves logs and filters to the database asynchronously
+ */
 public class AsyncSave extends Thread {
     private ArrayList<Log> logs;
     private LogRepository logRepository;

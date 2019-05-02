@@ -9,7 +9,6 @@ public class Log {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    private String hash;
     private String row;
     private Integer count;
 
@@ -21,14 +20,6 @@ public class Log {
 
     public Integer getId() {
         return id;
-    }
-
-    public String getHash() {
-        return hash;
-    }
-
-    public void setHash(String hash) {
-        this.hash = hash;
     }
 
     public String getRow() {
@@ -51,8 +42,7 @@ public class Log {
 
     }
 
-    public Log(String hash, String row, Integer count, File fileid) {
-        this.hash = hash;
+    public Log(String row, Integer count, File fileid) {
         this.row = row;
         this.count = count;
         this.fileid = fileid;

@@ -1,10 +1,7 @@
 package com.thejonsey.cyber.Controller;
 
 import com.thejonsey.cyber.App;
-import com.thejonsey.cyber.Model.File;
-import com.thejonsey.cyber.Model.FileRepository;
-import com.thejonsey.cyber.Model.FilterRepository;
-import com.thejonsey.cyber.Model.LogRepository;
+import com.thejonsey.cyber.Model.*;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -31,32 +28,36 @@ public class AnalysisController {
     }
 
     @GetMapping
-    public ModelAndView getAnalysis(ModelMap model, @RequestParam Integer file, @RequestParam Integer column) {
+    public ModelAndView getAnalysis(ModelMap model, @RequestParam(required = false) Integer file, @RequestParam(required = false) Integer column) {
+        //region validates get params
+        if (file == null || column == null) {
+            return new IndexController(logRepository, fileRepository, filterRepository).getIndex(model, null, null);
+        }
         File selectedFile = fileRepository.getById(file);
         if (selectedFile == null) {
             return new IndexController(logRepository, fileRepository, filterRepository).getIndex(model, null, null);
         }
-        HashMap<String, Integer> counts = new HashMap<>();
-        Boolean[] error = new Boolean[]{false};
+        ArrayList<Filter> filters = filterRepository.findAllByFileid(selectedFile);
+        if (filters.size() < column) {
+            return new IndexController(logRepository, fileRepository, filterRepository).getIndex(model, null, null);
+        }
+        //endregion
+        HashMap<String, Integer> counts = new HashMap<>(); //hashmap of column v count
         selectedFile.getLogs().forEach(log -> {
             String[] logSplit = log.getRow().split(",");
-            if (logSplit.length < column) {
-                error[0] = true;
-                return;
-            }
+            //region adds column value and count to hashmap, if value already exists, add this count to existing count
             if (counts.containsKey(logSplit[column])) {
                 counts.put(logSplit[column], counts.get(logSplit[column]) + log.getCount());
             }
             else {
                 counts.put(logSplit[column], log.getCount());
             }
+            //endregion
         });
-        if (error[0]) {
-            return new IndexController(logRepository, fileRepository, filterRepository).getIndex(model, null, null);
-        }
 
         LinkedHashMap<String, String> countsJson = new LinkedHashMap<>();
-        while (!counts.isEmpty() && countsJson.size() < 20) {
+        while (!counts.isEmpty() && countsJson.size() < App.analysis_amount) { //generates list of x least common rows, where x is defined in config
+            //region finds lowest occuring row
             int index = -1;
             int indexValue = Integer.MAX_VALUE;
             for (int x = 0; x < counts.values().size(); x++) {
@@ -65,12 +66,16 @@ public class AnalysisController {
                     indexValue = Integer.parseInt(counts.values().toArray()[x].toString());
                 }
             }
+            //endregion
+            //region adds row to map
             countsJson.put(counts.keySet().toArray()[index].toString(), counts.values().toArray()[index].toString());
             counts.remove(counts.keySet().toArray()[index].toString());
+            //endregion
         }
-        //counts.forEach((k, v) -> countsJson.put(k, v.toString()));
+        //region attributes for rendering engine
         model.addAttribute("columnCounts", countsJson);
         model.addAttribute("columnJSON", new JSONObject(countsJson));
+        //endregion
         return new ModelAndView("analysis");
     }
 

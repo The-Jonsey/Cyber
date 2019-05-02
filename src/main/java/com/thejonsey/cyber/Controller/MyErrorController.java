@@ -17,6 +17,9 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
+/**
+ * Class to show custom 404 and 500 page
+ */
 @RestController
 @RequestMapping("/error")
 public class MyErrorController implements ErrorController {

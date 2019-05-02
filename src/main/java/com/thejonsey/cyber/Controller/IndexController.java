@@ -3,11 +3,9 @@ package com.thejonsey.cyber.Controller;
 import com.thejonsey.cyber.Model.*;
 import com.thejonsey.cyber.App;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.ServletContext;
 import java.util.*;
@@ -31,7 +29,7 @@ public class IndexController {
 
     @GetMapping()
     ModelAndView getIndex(ModelMap model, @RequestParam(required = false) Integer page, @RequestParam(required = false) Integer file) {
-        // region cache access
+        // region validate and regenerate cache
         boolean itemchanged = false;
         if (App.logs.isEmpty()) {
             App.logs = (ArrayList<Log>) logRepository.findAll();
@@ -42,13 +40,15 @@ public class IndexController {
             itemchanged = true;
         }
         if (App.pagedLogs.isEmpty() || itemchanged) {
-            setPagedLogs();
+            App.setPagedLogs();
         }
         if (App.filters.isEmpty()) {
             App.files.forEach(f -> {
                 App.filters.put(f, filterRepository.findAllByFileid(f));
             });
         }
+        //endregion
+        //region default page and file if not specified in get params
         if (page == null) {
             page = 1;
         }
@@ -58,6 +58,8 @@ public class IndexController {
         if (file == null ) {
             file = App.files.get(0).getId();
         }
+        //endregion
+        //region get file from fileid
         File fileObject = null;
         for (File f : App.files) {
             if (f.getId().equals(file)) {
@@ -67,21 +69,26 @@ public class IndexController {
         if (fileObject == null) {
             fileObject = App.files.get(0);
         }
-        ArrayList<Log> logs = App.filedPagedLogs.get(fileObject).get(page);
-        // endregion
+        //endregion
+        ArrayList<Log> logs = App.filedPagedLogs.get(fileObject).get(page); //get relevent logs from file an page specified
         if (logs.size() > 0) {
+            //region adds next page and previous page buttons where applicable
             if (App.filedPagedLogs.get(fileObject).size() > page) {
                 model.addAttribute("next", true);
             }
             if (page > 1) {
                 model.addAttribute("back", true);
             }
+            //endregion
+            //region gets the filters from the database, as specified in the upload form
             ArrayList<File> fileList = (ArrayList<File>) fileRepository.findAll();
             ArrayList<Filter> filters = App.filters.get(fileObject);
             String[] col = new String[filters.size()];
             for (int i = 0; i < filters.size(); i++) {
                 col[i] = filters.get(i).getFilter();
             }
+            //endregion
+            //region converts files and logs into hashmaps
             List<HashMap<String, Object>> files = new ArrayList<>();
             for (File f : fileList) {
                 files.add(FileToHashMap(f, col));
@@ -90,18 +97,26 @@ public class IndexController {
             for (Log log : logs) {
                 rows.add(LogToHashMap(log, col));
             }
+            //endregion
             ArrayList<String> cols = new ArrayList<>(Arrays.asList(col));
             cols.add(0, "Count");
+            //region attributes for rendering engine
             model.addAttribute("columns", cols);
             model.addAttribute("files", files);
             model.addAttribute("file", fileObject.getId());
             model.addAttribute("page", page);
             model.addAttribute("list", rows);
+            //endregion
         }
         return new ModelAndView("index");
     }
 
-
+    /**
+     *
+     * @param log - Instance of log class, 1 row from database
+     * @param columns - columns for the rendering engine
+     * @return hashmap of log
+     */
     private HashMap<String, Object> LogToHashMap(Log log, String[] columns) {
         HashMap<String, Object> map = new HashMap<>();
         map.put("Count", log.getCount());
@@ -112,6 +127,12 @@ public class IndexController {
         return map;
     }
 
+    /**
+     *
+     * @param file - Instance of file class, 1 file from database
+     * @param col - columns for rendering engine
+     * @return hashmap of file
+     */
     private HashMap<String, Object> FileToHashMap(File file, String[] col) {
         HashMap<String, Object> map = new HashMap<>();
         map.put("id", file.getId());
@@ -119,40 +140,5 @@ public class IndexController {
         map.put("date", file.getUploaded());
         map.put("columns", col);
         return map;
-    }
-
-    public static void setPagedLogs() {
-        for (File file : App.files) {
-            if (!App.filedPagedLogs.containsKey(file)) {
-                HashMap<Integer, ArrayList<Log>> map = new HashMap<>();
-                map.put(1, new ArrayList<>());
-                App.filedPagedLogs.put(file, map);
-            }
-        }
-        for (int i = 0; i < App.logs.size(); i++) {
-            if (i % 50 == 0) {
-                ArrayList<Log> sublist = new ArrayList<>(App.logs.subList(i, (i + 50 > App.logs.size() ? App.logs.size() : i + 50)));
-                App.pagedLogs.put((i / 50) + 1, sublist);
-            }
-            File file = App.logs.get(i).getFileid();
-            for (File file1 : App.files) {
-                if (file1.getId().equals(file.getId())) {
-                    file = file1;
-                    break;
-                }
-            }
-            Set pages = App.filedPagedLogs.get(file).keySet();
-            int page = pages.size();
-            if (App.filedPagedLogs.get(file).get(page).size() == 50) {
-                App.filedPagedLogs.get(file).put(++page, new ArrayList<>());
-            }
-            App.filedPagedLogs.get(file).get(page).add(App.logs.get(i));
-        }
-    }
-
-    @RequestMapping(path="/500")
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public void InternalServerError() throws ResponseStatusException{
-        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Test");
     }
 }

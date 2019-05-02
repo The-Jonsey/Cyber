@@ -2,6 +2,10 @@ package com.thejonsey.cyber.Classes;
 
 import org.springframework.web.multipart.MultipartFile;
 
+
+/**
+ * Class to pull file from POST request
+ */
 public class FileModel {
     private MultipartFile file;
 
