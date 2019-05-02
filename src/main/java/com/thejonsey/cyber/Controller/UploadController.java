@@ -51,6 +51,11 @@ public class UploadController {
             return getUpload(model);
         }
         MultipartFile multipartFile = file.getFile();
+        String[] nameSplit = multipartFile.getOriginalFilename().split("\\.");
+        if (!nameSplit[nameSplit.length - 1].equals("csv")) {
+            model.addAttribute("error", "That is not a CSV");
+            return getUpload(model);
+        }
         File fileClass = new File(multipartFile.getOriginalFilename(), new Date(System.currentTimeMillis()));
         String content = new String(multipartFile.getBytes(), StandardCharsets.UTF_8);
         //endregion

@@ -11,6 +11,5 @@
 
 ## Building
 
- - Edit src/main/resources/application.properties and change the spring.datasource settings to match your local database settings
- - Run mvn install
- - Run mvn spring-boot:run
+ - Run `docker-compose up --build`
+ - Connect to \<ipaddress\>:8080 e.g localhost:8080

@@ -17,6 +17,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.LinkedMultiValueMap;
@@ -27,6 +28,7 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -58,12 +60,43 @@ public class DemoApplicationTests {
 	public void fileUploadTest() throws Exception {
 		runFileTest("kddcup.testdata.csv");
 	}
+
+	@Test
+	public void notACSVTest() throws Exception {
+		String filename = "pom.xml";
+		try (BufferedReader f = new BufferedReader(new FileReader(filename))) {
+			StringBuilder s = new StringBuilder();
+			String line = f.readLine();
+			while (line != null) {
+				s.append(line);
+				s.append(System.lineSeparator());
+				line = f.readLine();
+			}
+			LinkedMultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+			List<String> l = new ArrayList<>();
+			l.add("true");
+			for (int i = 0; i < s.toString().split(System.lineSeparator())[0].split(",").length; i++) {
+				params.put(String.valueOf(i), l);
+			}
+			MockMultipartFile file = new MockMultipartFile("file", filename, "text/csv", s.toString().getBytes());
+			MockMvc mock = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+			MvcResult res = mock.perform(MockMvcRequestBuilders.multipart("/upload")
+					.file(file)
+					.params(params))
+					.andExpect(status().is(200))
+					.andReturn();
+			String content = res.getResponse().getContentAsString();
+			junit.framework.Assert.assertTrue(content.contains("That is not a CSV"));
+		}
+	}
+
 	@Test
 	public void bigFileUploadTest() throws Exception {
 		runFileTest("kddcup.testdata.unlabeled_10_percent.csv");
 	}
 
 	private void runFileTest(String filename) throws Exception {
+		long startTime = System.currentTimeMillis();
 		try (BufferedReader f = new BufferedReader(new FileReader(filename))) {
 			StringBuilder s = new StringBuilder();
 			String line = f.readLine();
@@ -99,6 +132,8 @@ public class DemoApplicationTests {
 				count += log.getCount();
 			}
 			junit.framework.Assert.assertEquals(count, s.toString().split("\n").length);
+			long endTime = System.currentTimeMillis();
+			junit.framework.Assert.assertTrue(((endTime - startTime) / 1000) < 60);
 		}
 	}
 }
