@@ -18,3 +18,8 @@ thead {
 header {
     margin-bottom: 10px;
 }
+
+th, td {
+    padding: 0 !important;
+    margin: 0 !important;
+}
