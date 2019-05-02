@@ -1,11 +1,12 @@
 language: java
 services:
-  mysql
+  - mysql
+  - docker
 before_install:
   - mysql -e 'CREATE DATABASE Cyber; GRANT ALL PRIVILEGES ON Cyber.* TO "spring"@"localhost" IDENTIFIED BY "cyber"; FLUSH PRIVILEGES;'
 script:
   - mvn install
-  - mvn package
+  - docker-compose up --build -d
 deploy:
   provider: script
   script: sh deploy.sh $word
