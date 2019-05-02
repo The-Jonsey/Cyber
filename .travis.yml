@@ -10,8 +10,3 @@ script:
   - docker-compose up --build -d
   - sed -i 's/mysql:3306/localhost:3306/g' src/main/resources/application.properties
   - mvn install
-deploy:
-  provider: script
-  script: sh deploy.sh $word
-  on:
-    branch: master
