@@ -2,6 +2,8 @@ language: java
 services:
   - mysql
   - docker
+addons:
+  hostname: mysql
 before_install:
   - mysql -e 'CREATE DATABASE Cyber; GRANT ALL PRIVILEGES ON Cyber.* TO "spring"@"localhost" IDENTIFIED BY "cyber"; FLUSH PRIVILEGES;'
 script:
