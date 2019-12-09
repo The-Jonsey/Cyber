@@ -1,0 +1,55 @@
+spring:
+  data:
+    jpa:
+      repositories:
+        enabled: true
+  datasource:
+    driverClassName: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 100
+    password: cyber
+    url: jdbc:mysql://localhost:3306/Cyber
+    username: spring
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 1000
+        order_inserts: true
+        order_updates: false
+  servlet:
+    multipart:
+      max-file-size: -1
+      max-request-size: 1000MB
+  flyway:
+    locations: classpath:db/migration
+    out-of-order: true
+    clean-disabled: true
+    placeholderReplacement: false
+    enabled: true
+    baseline-on-migrate: true
+    user: ${spring.datasource.username}
+    url: ${spring.datasource.url}
+    password: ${spring.datasource.password}
+
+
+---
+
+spring:
+  profiles: debug
+  jpa:
+    properties:
+      hibernate:
+        show_sql: true
+        use_sql_comments: true
+        format_sql: true
+        generate_statistics: true
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.security.oauth2: DEBUG
+    org.springframework.security.web.FilterChainProxy: DEBUG
+    org.springframework.web.servlet.mvc.method.annotation: DEBUG
