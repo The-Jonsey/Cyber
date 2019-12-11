@@ -3,7 +3,6 @@ package com.thejonsey.domain.model;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 @Getter
 @AllArgsConstructor
@@ -17,14 +16,9 @@ public class Log {
 
   private UUID id = UUID.randomUUID();
 
-
   private String row;
 
   private Integer count;
 
   private File file;
-
-  public void addCount(int add) {
-    count += add;
-  }
 }

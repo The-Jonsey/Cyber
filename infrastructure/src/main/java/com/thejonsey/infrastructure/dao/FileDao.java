@@ -12,5 +12,7 @@ public interface FileDao extends JpaRepository<FileEntity, UUID> {
 
   Optional<FileEntity> findById(UUID id);
 
+  List<FileEntity> findAllByIdIn(List<UUID> ids);
+
   List<FileEntity> findAllByFilename(String filename);
 }

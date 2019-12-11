@@ -50,10 +50,10 @@
       <version>2.4.0</version>
     </dependency>
     <dependency>
-    <groupId>com.thejonsey</groupId>
-    <artifactId>infrastructure</artifactId>
-    <version>1.0.0</version>
-  </dependency>
+      <groupId>com.thejonsey</groupId>
+      <artifactId>infrastructure</artifactId>
+      <version>1.0.0</version>
+    </dependency>
     <dependency>
       <groupId>com.thejonsey</groupId>
       <artifactId>migration</artifactId>
@@ -63,7 +63,7 @@
 
   <build>
     <plugins>
-        <plugin>
+      <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
         <version>${org.springframework.version}</version>

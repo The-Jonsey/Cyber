@@ -10,7 +10,8 @@ public class FileMapper {
         file.getId(),
         file.getFilename(),
         file.getUploaded(),
-        file.getRows()
+        file.getRows(),
+        file.isCompleted()
     );
   }
 
@@ -19,7 +20,8 @@ public class FileMapper {
         fileEntity.getId(),
         fileEntity.getFilename(),
         fileEntity.getUploaded(),
-        fileEntity.getRows()
+        fileEntity.getRows(),
+        fileEntity.isCompleted()
     );
   }
 

@@ -9,6 +9,10 @@ public interface GetFile {
 
   Optional<File> byId(UUID id);
 
+  List<File> byIds(List<UUID> id);
+
   List<File> byFilename(String filename);
+
+  List<File> getAll();
 
 }

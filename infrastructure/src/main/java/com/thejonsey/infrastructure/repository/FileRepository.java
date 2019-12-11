@@ -22,8 +22,20 @@ public class FileRepository implements GetFile, SaveFile {
   }
 
   @Override
+  public List<File> byIds(List<UUID> id) {
+    return fileDao.findAllByIdIn(id).stream().map(FileMapper::fromEntityToModel)
+        .collect(Collectors.toList());
+  }
+
+  @Override
   public List<File> byFilename(String filename) {
     return fileDao.findAllByFilename(filename).stream().map(FileMapper::fromEntityToModel)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<File> getAll() {
+    return fileDao.findAll().stream().map(FileMapper::fromEntityToModel)
         .collect(Collectors.toList());
   }
 

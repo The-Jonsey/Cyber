@@ -1,11 +1,10 @@
 package com.thejonsey.infrastructure.entity;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
-import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,13 +20,15 @@ import lombok.Setter;
 @Table(name = "file")
 public class FileEntity {
 
-    @Id
-    private UUID id;
+  @Id
+  private UUID id;
 
-    private String filename;
+  private String filename;
 
-    private LocalDateTime uploaded;
+  private LocalDateTime uploaded;
 
-    private int rows;
+  private int rows;
+
+  private boolean completed;
 
 }

@@ -4,7 +4,7 @@ import com.thejonsey.domain.usecase.file.GetFile;
 import com.thejonsey.domain.usecase.file.SaveFile;
 import com.thejonsey.domain.usecase.file.UploadFile;
 import com.thejonsey.domain.usecase.file.UploadFileUseCase;
-import com.thejonsey.domain.usecase.filerow.SaveFileRow;
+import com.thejonsey.domain.usecase.log.SaveLog;
 import com.thejonsey.infrastructure.dao.FileDao;
 import com.thejonsey.infrastructure.repository.FileRepository;
 import org.springframework.context.annotation.Bean;
@@ -14,8 +14,8 @@ import org.springframework.context.annotation.Configuration;
 public class DomainFileUseCaseConfig {
 
   @Bean
-  public UploadFile uploadFile(SaveFile saveFile, SaveFileRow saveFileRow) {
-    return new UploadFileUseCase(saveFile, saveFileRow);
+  public UploadFile uploadFile(SaveFile saveFile, SaveLog saveLog) {
+    return new UploadFileUseCase(saveFile, saveLog);
   }
 
   @Bean

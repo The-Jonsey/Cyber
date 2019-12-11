@@ -1,7 +1,9 @@
 package com.thejonsey.infrastructure.mapper;
 
 import com.thejonsey.domain.model.Log;
+import com.thejonsey.domain.model.SlimLog;
 import com.thejonsey.infrastructure.entity.LogEntity;
+import com.thejonsey.infrastructure.entity.SlimLogEntity;
 
 public class LogMapper {
 
@@ -21,6 +23,10 @@ public class LogMapper {
         logEntity.getCount(),
         FileMapper.fromEntityToModel(logEntity.getFile())
     );
+  }
+
+  public static SlimLog fromEntityToModel(SlimLogEntity slimLogEntity) {
+    return new SlimLog(slimLogEntity.getRow(), (int) slimLogEntity.getCount());
   }
 
 }

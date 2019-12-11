@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 @AllArgsConstructor
 @RequiredArgsConstructor
 public class File {
+
   private UUID id = UUID.randomUUID();
 
   private final String filename;
@@ -17,4 +18,10 @@ public class File {
   private LocalDateTime uploaded = LocalDateTime.now();
 
   private final int rows;
+
+  private boolean completed = false;
+
+  public void complete() {
+    completed = true;
+  }
 }

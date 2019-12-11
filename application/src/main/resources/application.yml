@@ -1,4 +1,6 @@
 spring:
+  jackson:
+    property-naming-strategy: SNAKE_CASE
   data:
     jpa:
       repositories:
@@ -16,8 +18,8 @@ spring:
     properties:
       hibernate:
         jdbc:
-          batch_size: 1000
-        order_inserts: true
+          batch_size: 10000
+        order_inserts: false
         order_updates: false
   servlet:
     multipart:
