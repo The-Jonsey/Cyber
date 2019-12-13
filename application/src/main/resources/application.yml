@@ -55,3 +55,11 @@ logging:
     org.springframework.security.oauth2: DEBUG
     org.springframework.security.web.FilterChainProxy: DEBUG
     org.springframework.web.servlet.mvc.method.annotation: DEBUG
+
+
+---
+
+spring:
+  profiles: docker
+  datasource:
+    url: jdbc:mysql://mysql:3306/Cyber

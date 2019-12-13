@@ -2,36 +2,24 @@ version: '3.1'
 
 services:
   mysql:
-    container_name: cyber-mysql
     command: --default-authentication-plugin=mysql_native_password
     restart: always
-    image: mysql:5.7.22
+    image: mysql:5.7.26
     environment:
-      - MYSQL_ROOT_PASSWORD=Docker # TODO: Change this
+      - MYSQL_RANDOM_ROOT_PASSWORD=true
       - MYSQL_USER=spring
       - MYSQL_PASSWORD=cyber
       - MYSQL_DATABASE=Cyber
-    networks:
-      - app-network
+    ports:
+      - 3306:3306
   cyber:
-    image: cyber
-    container_name: cyber
-    build: .
-    command: "mvn spring-boot:run"
-    volumes:
-      - cyber:/home/app
-    networks:
-      - app-network
     depends_on:
       - mysql
+    container_name: cyber-spring
+    image: the-jonsey/cyber:latest
+    links:
+      - mysql
     ports:
-      - "8080:8080"
-
-
-volumes:
-  cyber:
-  mysql:
-
-networks:
-  app-network:
-    driver: bridge
+      - '8080:8080'
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
